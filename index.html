@@ -39,32 +39,32 @@
 
     <main>
       <div class="mode-selector">
-        <button class="mode-btn active" data-mode="encrypt">
+        <button class="mode-btn active" data-mode="compress">
           <i class="ri-file-reduce-line"></i>
           Comprimir
         </button>
-        <button class="mode-btn" data-mode="decrypt">
+        <button class="mode-btn" data-mode="decompress">
           <i class="ri-file-upload-line"></i>
           Descomprimir
         </button>
       </div>
 
       <!-- COMPRIMIR -->
-      <div id="encrypt-mode" class="mode active">
-        <div class="drop-zone" id="drop-encrypt">
+      <div id="compress-mode" class="mode active">
+        <div class="drop-zone" id="drop-compress">
           <i class="ri-upload-cloud-2-line"></i>
-          <p id="file-name-encrypt">Arraste um arquivo ou clique para selecionar</p>
+          <p id="file-name-compress">Arraste um arquivo ou clique para selecionar</p>
           <span class="file-hint">Qualquer tipo de arquivo</span>
-          <input type="file" id="file-encrypt" />
+          <input type="file" id="file-compress" />
         </div>
 
         <label class="checkbox-label">
-          <input type="checkbox" id="use-pass-encrypt" checked />
+          <input type="checkbox" id="use-pass-compress" />
           <span>Proteger com senha (AES-256)</span>
         </label>
-        <input type="password" id="pass-encrypt" placeholder="Digite uma senha forte (opcional)" />
+        <input type="password" id="pass-compress" placeholder="Digite uma senha forte (opcional)" disabled />
 
-        <button id="btn-encrypt" class="action-btn">
+        <button id="btn-compress" class="action-btn">
           <i class="ri-file-reduce-line"></i>
           <span>Criar arquivo .pp</span>
           <i class="ri-arrow-right-line"></i>
@@ -72,21 +72,21 @@
       </div>
 
       <!-- DESCOMPRIMIR -->
-      <div id="decrypt-mode" class="mode">
-        <div class="drop-zone" id="drop-decrypt">
+      <div id="decompress-mode" class="mode">
+        <div class="drop-zone" id="drop-decompress">
           <i class="ri-folder-zip-line"></i>
-          <p id="file-name-decrypt">Arraste um arquivo .pp ou clique para selecionar</p>
+          <p id="file-name-decompress">Arraste um arquivo .pp ou clique para selecionar</p>
           <span class="file-hint">Apenas arquivos .pp</span>
-          <input type="file" id="file-decrypt" accept=".pp" />
+          <input type="file" id="file-decompress" accept=".pp" />
         </div>
 
         <label class="checkbox-label">
-          <input type="checkbox" id="use-pass-decrypt" checked />
+          <input type="checkbox" id="use-pass-decompress" />
           <span>Arquivo protegido por senha</span>
         </label>
-        <input type="password" id="pass-decrypt" placeholder="Digite a senha do arquivo .pp" />
+        <input type="password" id="pass-decompress" placeholder="Digite a senha do arquivo .pp" disabled />
 
-        <button id="btn-decrypt" class="action-btn">
+        <button id="btn-decompress" class="action-btn">
           <i class="ri-file-upload-line"></i>
           <span>Extrair arquivo</span>
           <i class="ri-arrow-right-line"></i>
