@@ -3,70 +3,111 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Encripte .enc</title>
+  <title>Pied Piper - Compressão de Próxima Geração</title>
+  <meta name="description" content="Pied Piper: Algoritmo de compressão proprietário de alta performance com extensão .pp">
   <link rel="stylesheet" href="style.css" />
   <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet"/>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
   <div class="container">
     <header>
-      <h1>.enc</h1>
-      <p>Encripte arquivos com ZIP + AES-256.<br>Compatível com WinRAR, 7-Zip, etc.</p>
+      <div class="logo-container">
+        <div class="logo">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+            <path d="M20 5L35 12.5V27.5L20 35L5 27.5V12.5L20 5Z" fill="url(#gradient)" stroke="#0071e3" stroke-width="2"/>
+            <text x="20" y="26" text-anchor="middle" font-size="16" font-weight="bold" fill="white">PP</text>
+            <defs>
+              <linearGradient id="gradient" x1="5" y1="5" x2="35" y2="35">
+                <stop offset="0%" stop-color="#0071e3"/>
+                <stop offset="100%" stop-color="#005bb5"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <h1>Pied Piper</h1>
+      </div>
+      <p class="tagline">Compressão de Próxima Geração</p>
+      <p class="description">Algoritmo proprietário de alta performance com LZ77 otimizado + Huffman adaptativo.<br>
+      Formato <strong>.pp</strong> com criptografia AES-256 opcional.</p>
+      <div class="features">
+        <span class="feature-badge"><i class="ri-rocket-line"></i> Ultra-rápido</span>
+        <span class="feature-badge"><i class="ri-shield-check-line"></i> Seguro</span>
+        <span class="feature-badge"><i class="ri-cpu-line"></i> Motor em C</span>
+      </div>
     </header>
 
     <main>
       <div class="mode-selector">
-        <button class="mode-btn active" data-mode="encrypt">Encriptar</button>
-        <button class="mode-btn" data-mode="decrypt">Desencriptar</button>
+        <button class="mode-btn active" data-mode="encrypt">
+          <i class="ri-file-reduce-line"></i>
+          Comprimir
+        </button>
+        <button class="mode-btn" data-mode="decrypt">
+          <i class="ri-file-upload-line"></i>
+          Descomprimir
+        </button>
       </div>
 
-      <!-- ENCRIPTAR -->
+      <!-- COMPRIMIR -->
       <div id="encrypt-mode" class="mode active">
         <div class="drop-zone" id="drop-encrypt">
           <i class="ri-upload-cloud-2-line"></i>
-          <p id="file-name-encrypt">Nenhum arquivo</p>
+          <p id="file-name-encrypt">Arraste um arquivo ou clique para selecionar</p>
+          <span class="file-hint">Qualquer tipo de arquivo</span>
           <input type="file" id="file-encrypt" />
         </div>
 
         <label class="checkbox-label">
           <input type="checkbox" id="use-pass-encrypt" checked />
-          <span>Usar senha</span>
+          <span>Proteger com senha (AES-256)</span>
         </label>
-        <input type="password" id="pass-encrypt" placeholder="Senha (opcional)" />
+        <input type="password" id="pass-encrypt" placeholder="Digite uma senha forte (opcional)" />
 
         <button id="btn-encrypt" class="action-btn">
-          <span>Criar .enc</span>
+          <i class="ri-file-reduce-line"></i>
+          <span>Criar arquivo .pp</span>
           <i class="ri-arrow-right-line"></i>
         </button>
       </div>
 
-      <!-- DESENCRIPTAR -->
+      <!-- DESCOMPRIMIR -->
       <div id="decrypt-mode" class="mode">
         <div class="drop-zone" id="drop-decrypt">
           <i class="ri-folder-zip-line"></i>
-          <p id="file-name-decrypt">Nenhum .enc</p>
-          <input type="file" id="file-decrypt" accept=".enc" />
+          <p id="file-name-decrypt">Arraste um arquivo .pp ou clique para selecionar</p>
+          <span class="file-hint">Apenas arquivos .pp</span>
+          <input type="file" id="file-decrypt" accept=".pp" />
         </div>
 
         <label class="checkbox-label">
           <input type="checkbox" id="use-pass-decrypt" checked />
-          <span>Usar senha</span>
+          <span>Arquivo protegido por senha</span>
         </label>
-        <input type="password" id="pass-decrypt" placeholder="Senha do .enc" />
+        <input type="password" id="pass-decrypt" placeholder="Digite a senha do arquivo .pp" />
 
         <button id="btn-decrypt" class="action-btn">
-          <span>Extrair arquivos</span>
+          <i class="ri-file-upload-line"></i>
+          <span>Extrair arquivo</span>
           <i class="ri-arrow-right-line"></i>
         </button>
       </div>
     </main>
 
     <div id="result" class="result"></div>
+
+    <footer>
+      <p class="footer-text">
+        <i class="ri-code-line"></i> Motor em C + JavaScript |
+        <i class="ri-git-branch-line"></i> Open Source |
+        <i class="ri-github-line"></i> <a href="https://github.com" target="_blank">GitHub</a>
+      </p>
+      <p class="footer-tech">Pied Piper Algorithm v1.0 - Making the world a better place through compression</p>
+    </footer>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/crypto-js@4.2.0/crypto-js.min.js"></script>
+  <script src="lib/piedpiper.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
