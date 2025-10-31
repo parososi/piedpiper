@@ -175,10 +175,12 @@ document.getElementById('btn-compress').addEventListener('click', async () => {
             finalData = temp;
         }
 
-        // Calculate actual final size
+        // Get compression statistics
+        const stats = compressor.getStats();
         const finalSize = finalData.length;
         const savedBytes = originalSize - finalSize;
         const savedPercentage = ((savedBytes / originalSize) * 100).toFixed(1);
+        const compressionRatio = ((finalSize / originalSize) * 100).toFixed(1);
 
         // Download file
         const blob = new Blob([finalData], { type: 'application/octet-stream' });
@@ -189,30 +191,49 @@ document.getElementById('btn-compress').addEventListener('click', async () => {
         a.click();
         URL.revokeObjectURL(url);
 
-        // Show detailed success message
+        // Show detailed success message with advanced statistics
         const isSmaller = finalSize < originalSize;
         const message = `
             <div style="text-align: center;">
                 <div style="font-size: 28px; margin-bottom: 12px;">✅</div>
-                <div style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">Arquivo comprimido com sucesso!</div>
-                <div style="display: flex; justify-content: space-around; align-items: center; margin: 20px 0; padding: 16px; background: rgba(0,113,227,0.05); border-radius: 12px;">
+                <div style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">Compressão Concluída!</div>
+                <div style="font-size: 13px; color: #86868b; margin-bottom: 16px;">Algoritmo Middle-Out • Fundação Parososi</div>
+
+                <div style="display: flex; justify-content: space-around; align-items: center; margin: 20px 0; padding: 20px; background: linear-gradient(135deg, rgba(0,113,227,0.08) 0%, rgba(0,113,227,0.02) 100%); border-radius: 16px; border: 1px solid rgba(0,113,227,0.1);">
                     <div style="text-align: center;">
-                        <div style="font-size: 12px; color: #86868b; margin-bottom: 4px;">ORIGINAL</div>
-                        <div style="font-size: 18px; font-weight: 700; color: #1d1d1f;">${formatBytes(originalSize)}</div>
+                        <div style="font-size: 11px; color: #86868b; margin-bottom: 6px; letter-spacing: 0.5px;">TAMANHO ORIGINAL</div>
+                        <div style="font-size: 22px; font-weight: 700; color: #1d1d1f;">${formatBytes(originalSize)}</div>
                     </div>
-                    <div style="font-size: 24px; color: #0071e3;">→</div>
+                    <div style="font-size: 28px; color: #0071e3;">→</div>
                     <div style="text-align: center;">
-                        <div style="font-size: 12px; color: #86868b; margin-bottom: 4px;">COMPRIMIDO</div>
-                        <div style="font-size: 18px; font-weight: 700; color: #0071e3;">${formatBytes(finalSize)}</div>
+                        <div style="font-size: 11px; color: #86868b; margin-bottom: 6px; letter-spacing: 0.5px;">COMPRIMIDO</div>
+                        <div style="font-size: 22px; font-weight: 700; color: #0071e3;">${formatBytes(finalSize)}</div>
                     </div>
                 </div>
+
                 ${isSmaller ? `
-                    <div style="padding: 12px; background: linear-gradient(135deg, #30d158 0%, #28a745 100%); color: white; border-radius: 8px; font-weight: 600; margin-top: 12px;">
-                        🎉 Economia de ${formatBytes(savedBytes)} (${savedPercentage}%)
+                    <div style="padding: 16px; background: linear-gradient(135deg, #30d158 0%, #28a745 100%); color: white; border-radius: 12px; margin-top: 12px; box-shadow: 0 4px 12px rgba(48,209,88,0.3);">
+                        <div style="font-size: 16px; font-weight: 700; margin-bottom: 8px;">🎉 Compressão Bem-Sucedida!</div>
+                        <div style="display: flex; justify-content: space-around; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.3);">
+                            <div>
+                                <div style="font-size: 11px; opacity: 0.9;">ECONOMIA</div>
+                                <div style="font-size: 18px; font-weight: 700;">${formatBytes(savedBytes)}</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 11px; opacity: 0.9;">TAXA DE COMPRESSÃO</div>
+                                <div style="font-size: 18px; font-weight: 700;">${savedPercentage}%</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 11px; opacity: 0.9;">TAMANHO FINAL</div>
+                                <div style="font-size: 18px; font-weight: 700;">${compressionRatio}%</div>
+                            </div>
+                        </div>
                     </div>
                 ` : `
-                    <div style="padding: 12px; background: #fff3cd; color: #856404; border-radius: 8px; font-size: 13px; margin-top: 12px;">
-                        ⚠️ O arquivo comprimido ficou maior que o original. Isso pode acontecer com arquivos já comprimidos (ZIP, JPG, PNG, etc) ou arquivos muito pequenos.
+                    <div style="padding: 16px; background: linear-gradient(135deg, #ff9500 0%, #ff6b00 100%); color: white; border-radius: 12px; margin-top: 12px;">
+                        <div style="font-size: 14px; font-weight: 600; margin-bottom: 6px;">⚠️ Arquivo Não Comprimível</div>
+                        <div style="font-size: 12px; opacity: 0.95;">Este arquivo já está comprimido ou não possui padrões comprimíveis (ZIP, JPEG, PNG, etc).</div>
+                        <div style="margin-top: 8px; font-size: 11px; opacity: 0.85;">Aumento: ${formatBytes(Math.abs(savedBytes))}</div>
                     </div>
                 `}
             </div>
