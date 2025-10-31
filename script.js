@@ -11,7 +11,7 @@ const compressor = new PiedPiperCompressor();
 
 // Web Worker support for large files
 let compressionWorker = null;
-const WORKER_THRESHOLD = 10 * 1024 * 1024; // Use worker for files > 10MB
+const WORKER_THRESHOLD = 5 * 1024 * 1024; // Use worker for files > 5MB
 
 function getCompressionWorker() {
     if (!compressionWorker) {
@@ -57,12 +57,12 @@ function compressWithWorker(data, level) {
             reject(error);
         };
 
-        // Send data to worker
+        // Send data to worker (copy buffer to avoid transfer issues)
         worker.postMessage({
             action: 'compress',
-            data: data,
+            data: new Uint8Array(data), // Create copy
             level: level
-        }, [data.buffer]);
+        });
     });
 }
 
@@ -98,11 +98,11 @@ function decompressWithWorker(data) {
             reject(error);
         };
 
-        // Send data to worker
+        // Send data to worker (copy buffer to avoid transfer issues)
         worker.postMessage({
             action: 'decompress',
-            data: data
-        }, [data.buffer]);
+            data: new Uint8Array(data) // Create copy
+        });
     });
 }
 
@@ -277,13 +277,13 @@ document.getElementById('btn-compress').addEventListener('click', async () => {
 
         if (originalSize > WORKER_THRESHOLD) {
             // Use Web Worker for large files to avoid blocking UI
-            const result = await compressWithWorker(input, 6);
+            const result = await compressWithWorker(input, 9);  // Level 9 for extreme compression
             compressed = result.data;
             compressionStats = result.stats;
         } else {
             // Use main thread for small files
             compressor.setProgressCallback(updateProgress);
-            compressed = compressor.compress(input, 6);
+            compressed = compressor.compress(input, 9);  // Level 9 for extreme compression
             compressionStats = compressor.getStats();
             compressor.setProgressCallback(null);
         }
