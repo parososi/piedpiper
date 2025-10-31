@@ -261,14 +261,28 @@ input[type="password"]:disabled {
   transition: all 0.2s ease;
 }
 
-.action-btn:hover {
+.action-btn:hover:not(:disabled) {
   background: var(--primary-dark);
   transform: translateY(-2px);
   box-shadow: 0 8px 16px rgba(0,113,227,0.3);
 }
 
-.action-btn:active {
+.action-btn:active:not(:disabled) {
   transform: translateY(0);
+}
+
+.action-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.action-btn .ri-loader-4-line {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 .result {
