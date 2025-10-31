@@ -197,7 +197,7 @@ document.getElementById('btn-compress').addEventListener('click', async () => {
             <div style="text-align: center;">
                 <div style="font-size: 28px; margin-bottom: 12px;">✅</div>
                 <div style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">Compressão Concluída!</div>
-                <div style="font-size: 13px; color: #86868b; margin-bottom: 16px;">Algoritmo Middle-Out • Fundação Parososi</div>
+                <div style="font-size: 13px; color: #86868b; margin-bottom: 16px;">Algoritmo PIPER • Fundação Parososi</div>
 
                 <div style="display: flex; justify-content: space-around; align-items: center; margin: 20px 0; padding: 20px; background: linear-gradient(135deg, rgba(0,113,227,0.08) 0%, rgba(0,113,227,0.02) 100%); border-radius: 16px; border: 1px solid rgba(0,113,227,0.1);">
                     <div style="text-align: center;">
