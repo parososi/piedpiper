@@ -9,6 +9,103 @@ let selectedFileDecompress = null;
 // Initialize compressor
 const compressor = new PiedPiperCompressor();
 
+// Web Worker support for large files
+let compressionWorker = null;
+const WORKER_THRESHOLD = 10 * 1024 * 1024; // Use worker for files > 10MB
+
+function getCompressionWorker() {
+    if (!compressionWorker) {
+        try {
+            compressionWorker = new Worker('lib/compression-worker.js');
+        } catch (error) {
+            console.warn('Web Worker not available:', error);
+            return null;
+        }
+    }
+    return compressionWorker;
+}
+
+// Compress using Web Worker (for large files)
+function compressWithWorker(data, level) {
+    return new Promise((resolve, reject) => {
+        const worker = getCompressionWorker();
+
+        if (!worker) {
+            // Fallback to main thread
+            try {
+                const result = compressor.compress(data, level);
+                resolve(result);
+            } catch (error) {
+                reject(error);
+            }
+            return;
+        }
+
+        worker.onmessage = (e) => {
+            const { type, data: resultData, stats, message } = e.data;
+
+            if (type === 'progress') {
+                updateProgress(resultData);
+            } else if (type === 'complete') {
+                resolve({ data: resultData, stats });
+            } else if (type === 'error') {
+                reject(new Error(message));
+            }
+        };
+
+        worker.onerror = (error) => {
+            reject(error);
+        };
+
+        // Send data to worker
+        worker.postMessage({
+            action: 'compress',
+            data: data,
+            level: level
+        }, [data.buffer]);
+    });
+}
+
+// Decompress using Web Worker (for large files)
+function decompressWithWorker(data) {
+    return new Promise((resolve, reject) => {
+        const worker = getCompressionWorker();
+
+        if (!worker) {
+            // Fallback to main thread
+            try {
+                const result = compressor.decompress(data);
+                resolve(result);
+            } catch (error) {
+                reject(error);
+            }
+            return;
+        }
+
+        worker.onmessage = (e) => {
+            const { type, data: resultData, message } = e.data;
+
+            if (type === 'progress') {
+                updateProgress(resultData);
+            } else if (type === 'complete') {
+                resolve(resultData);
+            } else if (type === 'error') {
+                reject(new Error(message));
+            }
+        };
+
+        worker.onerror = (error) => {
+            reject(error);
+        };
+
+        // Send data to worker
+        worker.postMessage({
+            action: 'decompress',
+            data: data
+        }, [data.buffer]);
+    });
+}
+
 // Mode switching
 document.querySelectorAll('.mode-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -128,6 +225,30 @@ document.getElementById('use-pass-decompress').addEventListener('change', (e) =>
     document.getElementById('pass-decompress').disabled = !e.target.checked;
 });
 
+// Progress bar functions
+function showProgress() {
+    const progressContainer = document.getElementById('progress-container');
+    progressContainer.style.display = 'block';
+    hideResult();
+}
+
+function hideProgress() {
+    const progressContainer = document.getElementById('progress-container');
+    progressContainer.style.display = 'none';
+}
+
+function updateProgress(progressData) {
+    const progressFill = document.getElementById('progress-fill');
+    const progressPercent = document.getElementById('progress-percent');
+    const progressStage = document.getElementById('progress-stage');
+    const progressMessage = document.getElementById('progress-message');
+
+    progressFill.style.width = progressData.percent + '%';
+    progressPercent.textContent = Math.floor(progressData.percent) + '%';
+    progressStage.textContent = progressData.stage.toUpperCase();
+    progressMessage.textContent = progressData.message;
+}
+
 // Compress button
 document.getElementById('btn-compress').addEventListener('click', async () => {
     if (!selectedFileCompress) {
@@ -142,14 +263,30 @@ document.getElementById('btn-compress').addEventListener('click', async () => {
         // Show loading state
         button.disabled = true;
         button.innerHTML = '<i class="ri-loader-4-line"></i> <span>Comprimindo...</span>';
-        showResult('⏳ Comprimindo arquivo...', 'info');
+
+        // Show progress bar
+        showProgress();
 
         const arrayBuffer = await selectedFileCompress.arrayBuffer();
         const input = new Uint8Array(arrayBuffer);
         const originalSize = input.length;
 
-        // Compress using Pied Piper algorithm
-        const compressed = compressor.compress(input, 6);
+        // Use worker for large files, main thread for small files
+        let compressed;
+        let compressionStats;
+
+        if (originalSize > WORKER_THRESHOLD) {
+            // Use Web Worker for large files to avoid blocking UI
+            const result = await compressWithWorker(input, 6);
+            compressed = result.data;
+            compressionStats = result.stats;
+        } else {
+            // Use main thread for small files
+            compressor.setProgressCallback(updateProgress);
+            compressed = compressor.compress(input, 6);
+            compressionStats = compressor.getStats();
+            compressor.setProgressCallback(null);
+        }
 
         // Add password encryption if enabled
         const usePassword = document.getElementById('use-pass-compress').checked;
@@ -239,13 +376,16 @@ document.getElementById('btn-compress').addEventListener('click', async () => {
             </div>
         `;
 
+        hideProgress();
         showResult(message, 'success');
     } catch (error) {
         console.error(error);
+        hideProgress();
         showResult('❌ Erro ao comprimir arquivo: ' + error.message, 'error');
     } finally {
         button.disabled = false;
         button.innerHTML = originalText;
+        compressor.setProgressCallback(null);
     }
 });
 
@@ -263,7 +403,9 @@ document.getElementById('btn-decompress').addEventListener('click', async () => 
         // Show loading state
         button.disabled = true;
         button.innerHTML = '<i class="ri-loader-4-line"></i> <span>Descomprimindo...</span>';
-        showResult('⏳ Descomprimindo arquivo...', 'info');
+
+        // Show progress bar
+        showProgress();
 
         const arrayBuffer = await selectedFileDecompress.arrayBuffer();
         let data = new Uint8Array(arrayBuffer);
@@ -307,8 +449,18 @@ document.getElementById('btn-decompress').addEventListener('click', async () => 
             }
         }
 
-        // Decompress using Pied Piper algorithm
-        const decompressed = compressor.decompress(data);
+        // Use worker for large files, main thread for small files
+        let decompressed;
+
+        if (data.length > WORKER_THRESHOLD) {
+            // Use Web Worker for large files to avoid blocking UI
+            decompressed = await decompressWithWorker(data);
+        } else {
+            // Use main thread for small files
+            compressor.setProgressCallback(updateProgress);
+            decompressed = compressor.decompress(data);
+            compressor.setProgressCallback(null);
+        }
 
         // Download file
         const blob = new Blob([decompressed], { type: 'application/octet-stream' });
@@ -347,13 +499,16 @@ document.getElementById('btn-decompress').addEventListener('click', async () => 
             </div>
         `;
 
+        hideProgress();
         showResult(message, 'success');
     } catch (error) {
         console.error(error);
+        hideProgress();
         showResult('❌ Erro ao descomprimir arquivo: ' + error.message, 'error');
     } finally {
         button.disabled = false;
         button.innerHTML = originalText;
+        compressor.setProgressCallback(null);
     }
 });
 
