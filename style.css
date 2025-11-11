@@ -286,7 +286,7 @@ input[type="password"]:disabled {
 }
 
 .result {
-  margin-top: 24px;
+  margin: 24px 40px 0;
   padding: 16px;
   border-radius: 12px;
   font-size: 15px;
