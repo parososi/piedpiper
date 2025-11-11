@@ -357,11 +357,66 @@ footer {
   to { opacity: 1; transform: translateY(0); }
 }
 
-@media (max-width: 480px) {
-  .container { margin: 16px; }
-  header { padding: 32px 24px; }
-  h1 { font-size: 40px; }
+@media (max-width: 560px) {
+    body { padding: 20px 10px; }
+    .container { margin: 0 auto; border-radius: 20px; }
+    header { padding: 32px 24px; }
+    h1 { font-size: 36px; }
+    main { padding: 24px; }
+    .result { margin: 16px 24px 0; }
+    .progress-container { margin: 16px 24px; }
 }
+
+@media (max-width: 400px) {
+    body { padding: 10px 5px; }
+    .container { margin: 0 auto; }
+    main { padding: 20px; }
+    .result { margin: 16px 20px 0; }
+     .progress-container { margin: 16px 20px; }
+    h1 { font-size: 32px; }
+    .tagline { font-size: 18px; }
+    .mode-btn { font-size: 14px; padding: 10px; }
+    .drop-zone { padding: 24px 16px; }
+}
+
+.stat-card {
+    margin-top: 20px;
+    padding: 18px;
+    background: #f8f9fa;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    text-align: left;
+}
+
+.stat-card .stat-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.stat-card .stat-row:last-child {
+    border-bottom: none;
+}
+
+.stat-card .stat-label {
+    font-weight: 500;
+    color: var(--gray);
+}
+
+.stat-card .stat-value {
+    font-weight: 600;
+    color: var(--text);
+}
+
+.stat-card .stat-value.positive {
+    color: var(--success);
+}
+
+.stat-card .stat-value.negative {
+    color: var(--error);
+}
+
 /* Progress Bar Styles */
 .progress-container {
   margin: 24px 40px;

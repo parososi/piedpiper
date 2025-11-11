@@ -256,12 +256,9 @@ async function handleCompression(inputData, fileName) {
         finalData = temp;
     }
 
-    // Download the result
-    downloadFile(finalData, fileName + '.pp');
-
     // Display results
     hideProgress();
-    showCompressionSuccess(originalSize, finalData.length);
+    showCompressionSuccess(originalSize, finalData.length, finalData, fileName + '.pp');
 }
 
 async function handleDecompression(inputData, fileName) {
@@ -298,12 +295,9 @@ async function handleDecompression(inputData, fileName) {
     // Call the worker to decompress
     const decompressedData = await callWorker('decompress', dataToDecompress);
 
-    // Download the result
-    downloadFile(decompressedData, fileName.replace(/\.pp$/, ''));
-
     // Display results
     hideProgress();
-    showDecompressionSuccess(compressedSize, decompressedData.length, fileName.replace(/\.pp$/, ''));
+    showDecompressionSuccess(compressedSize, decompressedData.length, decompressedData, fileName.replace(/\.pp$/, ''));
 }
 
 
@@ -312,62 +306,67 @@ document.getElementById('btn-decompress').addEventListener('click', () => perfor
 
 
 // --- Utility and Display Functions ---
-function downloadFile(data, fileName) {
+function createDownloadLink(data, fileName) {
     const blob = new Blob([data], { type: 'application/octet-stream' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = fileName;
-    document.body.appendChild(a);
-    a.click();
-    window.URL.revokeObjectURL(url);
-    document.body.removeChild(a);
+    const downloadBtn = document.createElement('a');
+    downloadBtn.href = url;
+    downloadBtn.download = fileName;
+    downloadBtn.className = 'action-btn';
+    downloadBtn.innerHTML = '<i class="ri-download-2-line"></i><span>Baixar Arquivo</span>';
+    return downloadBtn;
 }
 
-function showCompressionSuccess(originalSize, finalSize) {
+function showCompressionSuccess(originalSize, finalSize, data, fileName) {
     const savedBytes = originalSize - finalSize;
     const savedPercentage = originalSize > 0 ? (savedBytes / originalSize * 100).toFixed(1) : 0;
     const isSmaller = finalSize < originalSize;
-    const compressionRatio = originalSize > 0 ? (finalSize / originalSize * 100).toFixed(1) : 0;
 
     const message = `
-        <div style="text-align: center;">
-            <div style="font-size: 28px; margin-bottom: 12px;">✅</div>
-            <div style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">Compressão Concluída!</div>
-            <div style="display: flex; justify-content: space-around; align-items: center; margin: 20px 0; padding: 20px; background: #f0f8ff; border-radius: 16px;">
-                <div>Tamanho Original: <strong>${formatBytes(originalSize)}</strong></div>
-                <div>Tamanho Final: <strong>${formatBytes(finalSize)}</strong></div>
+        <div style="text-align: center; font-size: 18px; font-weight: 700;">Compressão Concluída!</div>
+        <div class="stat-card">
+            <div class="stat-row">
+                <span class="stat-label">Tamanho Original</span>
+                <span class="stat-value">${formatBytes(originalSize)}</span>
             </div>
-            ${isSmaller ? `
-                <div style="padding: 16px; background: #e8f5e9; color: #2e7d32; border-radius: 12px;">
-                    <strong>Economia de ${formatBytes(savedBytes)} (${savedPercentage}%)</strong>
-                </div>
-            ` : `
-                <div style="padding: 16px; background: #fff3e0; color: #e65100; border-radius: 12px;">
-                    <strong>O arquivo aumentou em ${formatBytes(Math.abs(savedBytes))}.</strong>
-                    <p><small>Isso pode acontecer com arquivos já comprimidos.</small></p>
-                </div>
-            `}
+            <div class="stat-row">
+                <span class="stat-label">Tamanho Comprimido</span>
+                <span class="stat-value">${formatBytes(finalSize)}</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Economia</span>
+                <span class="stat-value ${isSmaller ? 'positive' : 'negative'}">
+                    ${isSmaller ? formatBytes(savedBytes) : `-${formatBytes(Math.abs(savedBytes))}`} (${savedPercentage}%)
+                </span>
+            </div>
         </div>
     `;
+    const resultDiv = document.getElementById('result');
     showResult(message, 'success');
+    resultDiv.appendChild(createDownloadLink(data, fileName));
 }
 
-function showDecompressionSuccess(compressedSize, originalSize, fileName) {
+function showDecompressionSuccess(compressedSize, originalSize, data, fileName) {
     const message = `
-        <div style="text-align: center;">
-            <div style="font-size: 28px; margin-bottom: 12px;">✅</div>
-            <div style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">Descompressão Concluída!</div>
-            <div style="padding: 8px; background: #f0f0f0; border-radius: 8px; font-size: 13px; color: #666;">
-                📄 ${fileName}
+         <div style="text-align: center; font-size: 18px; font-weight: 700;">Descompressão Concluída!</div>
+         <div class="stat-card">
+            <div class="stat-row">
+                <span class="stat-label">Nome do Arquivo</span>
+                <span class="stat-value">${fileName}</span>
             </div>
-            <div style="display: flex; justify-content: space-around; align-items: center; margin-top: 20px; padding: 16px; background: #f0f8ff; border-radius: 12px;">
-                 <div>Tamanho Comprimido: <strong>${formatBytes(compressedSize)}</strong></div>
-                 <div>Tamanho Original: <strong>${formatBytes(originalSize)}</strong></div>
+            <div class="stat-row">
+                <span class="stat-label">Tamanho Comprimido</span>
+                <span class="stat-value">${formatBytes(compressedSize)}</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Tamanho Original</span>
+                <span class="stat-value">${formatBytes(originalSize)}</span>
             </div>
         </div>
     `;
+    const resultDiv = document.getElementById('result');
     showResult(message, 'success');
+    resultDiv.appendChild(createDownloadLink(data, fileName));
 }
 
 
