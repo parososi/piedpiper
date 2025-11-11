@@ -4,6 +4,9 @@ engine/*.o
 engine/*.wasm
 engine/*.js
 
+# Emscripten SDK
+emsdk/
+
 # Test files
 test_*.txt
 test_*.pp
